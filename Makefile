@@ -11,6 +11,7 @@
 #
 
 AR := ar qc
+CC := gcc -Wall -Werror
 HC := ghc
 HLINT := ~/.cabal/bin/hlint
 
@@ -62,6 +63,9 @@ CompFlags := -odir $(CompObjDir) -hidir $(CompInterDir)
 #
 
 MAKEFLAGS += --warn-undefined-variables --silent
+
+# Do not delete intermediate files.
+.SECONDARY :
 
 .PHONY : all
 all : paths library compiler tests
@@ -125,12 +129,17 @@ lint : $(CompSrcFiles)
 # Begin non-phony rules.
 
 $(TestInterDir)/%.c : $(TestSrcDir)/%.ktn
-	-@ $(CompTargetPath) $< > $@ 2> $(TestWarnDir)/$(basename $(notdir $@))
+	-@ $(CompTargetPath) $< > $@ \
+		2> $(TestWarnDir)/$(basename $(notdir $@))
 
-$(TestTargetDir)/% : $(TestInterDir)/%.c
+$(TestInterDir)/%.o : $(TestInterDir)/%.c
+	-@ $(CC) -c -std=c99 -I. $< -o $@ $(TestDebugFlags) \
+		2>> $(TestWarnDir)/$(basename $(notdir $@))
+
+$(TestTargetDir)/% : $(TestInterDir)/%.o
 	@ echo 'Building test $(notdir $@) ...'
-	-@ $(CC) -std=c99 $< -L$(TargetDir) -l$(LibTargetName) -lm -I. -o $@ \
-		2> /dev/null $(TestDebugFlags)
+	-@ $(CC) $< -L$(TargetDir) -l$(LibTargetName) -lm -o $@ \
+		2> /dev/null
 
 .depend : $(LibSrcPaths)
 	@ $(CC) -MM -o $@ $^ $(LibFlags)
