@@ -214,7 +214,7 @@ void kitten_quote(Boxed stack, Boxed definitions) {
   assert(stack);
   assert(is_quotation(stack));
   Boxed a = quotation_pop(stack);
-  quotation_push(stack, quotation_new(1, a));
+  quotation_push(stack, quotation_new(QUOTATION, 1, a));
 }
 
 void kitten_swap(Boxed stack, Boxed definitions) {

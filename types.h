@@ -42,6 +42,8 @@ typedef void         (*Implementation)(Boxed stack, Boxed definitions);
 typedef int64_t      Integer;
 typedef double       Float;
 typedef int          Word;
+typedef uint32_t     CodePoint;
+typedef uint8_t      Octet;
 
 /* A vector of references. */
 typedef struct Quotation {
@@ -50,12 +52,36 @@ typedef struct Quotation {
   Boxed *data;
 } Quotation;
 
+/* A vector of unboxed integers. */
+typedef struct IntegerQuotation {
+  int     size;
+  int     capacity;
+  Integer *data;
+} IntegerQuotation;
+
+/* A vector of unboxed floating-point values. */
+typedef struct FloatQuotation {
+  int   size;
+  int   capacity;
+  Float *data;
+} FloatQuotation;
+
+/* A vector of unboxed UTF-32 code points. */
+typedef struct CharacterQuotation {
+  int       size;
+  int       capacity;
+  CodePoint *data;
+} CharacterQuotation;
+
 /* A union of all built-in types. */
 typedef union Data {
-  Integer   as_integer;
-  Float     as_float;
-  Word      as_word;
-  Quotation as_quotation;
+  Integer            as_integer;
+  Float              as_float;
+  Word               as_word;
+  Quotation          as_quotation;
+  IntegerQuotation   as_integer_quotation;
+  FloatQuotation     as_float_quotation;
+  CharacterQuotation as_character_quotation;
 } Data;
 
 /* A typed, unboxed value. */
@@ -70,56 +96,58 @@ typedef struct Box {
   Value *value;
 } Box;
 
-/* *_alloc: Allocate unboxed values.
-   *_new:   Create boxed values.
-   *_unbox: Free and return boxed values. */
+/*
+ * *_alloc: Allocate unboxed values.
+ * *_new:   Create boxed values.
+ * *_unbox: Free and return boxed values.
+ */
 
-Boxed     boxed_clone      (Boxed reference);
-int       boxed_compare    (Boxed a, Boxed b);
-Boxed     boxed_copy       (Boxed reference);
-void      boxed_free       (Boxed reference);
-Boxed     boxed_new        (Unboxed unboxed);
-int       boxed_promote    (Boxed a, Boxed b, Boxed *da, Boxed *db);
-void      boxed_putc       (Boxed reference);
-Type      boxed_type       (Boxed reference);
-void      boxed_write      (Boxed reference);
+Boxed     boxed_clone       (Boxed reference);
+int       boxed_compare     (Boxed a, Boxed b);
+Boxed     boxed_copy        (Boxed reference);
+void      boxed_free        (Boxed reference);
+Boxed     boxed_new         (Unboxed unboxed);
+int       boxed_promote     (Boxed a, Boxed b, Boxed *da, Boxed *db);
+void      boxed_putc        (Boxed reference);
+Type      boxed_type        (Boxed reference);
+void      boxed_write       (Boxed reference);
 
-Unboxed   float_alloc      (Float value);
-Boxed     float_new        (Float value);
-Float     float_unbox      (Boxed reference);
-Float     float_value      (Boxed reference);
+Unboxed   float_alloc       (Float value);
+Boxed     float_new         (Float value);
+Float     float_unbox       (Boxed reference);
+Float     float_value       (Boxed reference);
 
-Unboxed   integer_alloc    (Integer value);
-Boxed     integer_new      (Integer value);
-Integer   integer_unbox    (Boxed reference);
-Integer   integer_value    (Boxed reference);
+Unboxed   integer_alloc     (Integer value);
+Boxed     integer_new       (Integer value);
+Integer   integer_unbox     (Boxed reference);
+Integer   integer_value     (Boxed reference);
 
-int       is_integer       (Boxed reference);
-int       is_float         (Boxed reference);
-int       is_numeric       (Boxed reference);
-int       is_quotation     (Boxed reference);
-int       is_word          (Boxed reference);
+int       is_integer        (Boxed reference);
+int       is_float          (Boxed reference);
+int       is_numeric        (Boxed reference);
+int       is_quotation      (Boxed reference);
+int       is_word           (Boxed reference);
 
-Unboxed   quotation_alloc   (int size);
+Unboxed   quotation_alloc   (Type type, int size);
 void      quotation_append  (Boxed target, Boxed source);
 void      quotation_apply   (Boxed target, Boxed source, Boxed definitions);
 void      quotation_clear   (Boxed quotation);
 int       quotation_compare (Boxed a, Boxed b);
 Boxed*    quotation_data    (Boxed quotation);
-Boxed     quotation_new     (int size, ...);
+Boxed     quotation_new     (Type type, int size, ...);
 void      quotation_push    (Boxed quotation, Boxed reference);
 Boxed     quotation_pop     (Boxed quotation);
 int       quotation_size    (Boxed quotation);
 Boxed     quotation_top     (Boxed quotation);
 
-void      unboxed_free     (Unboxed reference);
-Unboxed   unboxed_alloc    (void);
+void      unboxed_free      (Unboxed reference);
+Unboxed   unboxed_alloc     (void);
 
-Unboxed   word_alloc       (Word value);
-void      word_apply       (Word word, Boxed stack, Boxed definitions);
-Boxed     word_new         (Word value);
-Word      word_unbox       (Boxed reference);
-Word      word_value       (Boxed reference);
+Unboxed   word_alloc        (Word value);
+void      word_apply        (Word word, Boxed stack, Boxed definitions);
+Boxed     word_new          (Word value);
+Word      word_unbox        (Boxed reference);
+Word      word_value        (Boxed reference);
 
 extern Implementation map[WORD_COUNT];
 

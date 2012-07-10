@@ -21,7 +21,7 @@ void push(Boxed stack, Boxed reference);
  */
 #define MKF(VALUE)       float_new(VALUE)
 #define MKI(VALUE)       integer_new(INT64_C(VALUE))
-#define MKQ(SIZE, ...)   quotation_new(SIZE, __VA_ARGS__)
+#define MKQ(SIZE, ...)   quotation_new(QUOTATION, SIZE, __VA_ARGS__)
 #define MKW(VALUE)       word_new(-VALUE - 1)
 #define PUSHF(VALUE)     quotation_push(stack, MKF(VALUE));
 #define PUSHI(VALUE)     quotation_push(stack, MKI(VALUE));
@@ -50,14 +50,14 @@ void push(Boxed stack, Boxed reference);
 /*
  * Skeleton program.
  */
-#define KITTEN_PROGRAM(...)             \
-int main(int argc, char** argv) {       \
-  Boxed stack = quotation_new(0);       \
-  Boxed definitions = quotation_new(0); \
-  __VA_ARGS__                           \
-  boxed_free(definitions);              \
-  boxed_free(stack);                    \
-  return 0;                             \
+#define KITTEN_PROGRAM(...)                        \
+int main(int argc, char** argv) {                  \
+  Boxed stack = quotation_new(QUOTATION, 0);       \
+  Boxed definitions = quotation_new(QUOTATION, 0); \
+  __VA_ARGS__                                      \
+  boxed_free(definitions);                         \
+  boxed_free(stack);                               \
+  return 0;                                        \
 }
 
 #endif

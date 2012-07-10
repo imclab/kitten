@@ -45,7 +45,9 @@ Boxed boxed_clone(Boxed reference) {
     return integer_new(integer_value(reference));
   case QUOTATION:
     {
-      Boxed result = quotation_new(0);
+      // These steps are carried out separately in case of
+      // failure. I'm not terribly sure this is necessary.
+      Boxed result = quotation_new(QUOTATION, 0);
       quotation_append(result, reference);
       return result;
     }
@@ -466,16 +468,33 @@ int is_word(Boxed reference) {
  *
  * OWNERSHIP: NONE
  */
-Unboxed quotation_alloc(int size) {
+Unboxed quotation_alloc(Type type, int size) {
   assert(size >= 0);
   Unboxed reference = unboxed_alloc();
   if (!reference)
     goto error_allocating_value;
-  reference->type = QUOTATION;
+  int element_size;
+  switch (type) {
+  case QUOTATION:
+    element_size = sizeof(Boxed);
+    break;
+  case INTEGER_QUOTATION:
+    element_size = sizeof(Integer);
+    break;
+  case FLOAT_QUOTATION:
+    element_size = sizeof(Float);
+    break;
+  case CHARACTER_QUOTATION:
+    element_size = sizeof(CodePoint);
+    break;
+  default:
+    goto error_in_arguments;
+  }
+  reference->type = type;
   reference->data.as_quotation.size = size;
   reference->data.as_quotation.capacity = size;
   if (size) {
-    reference->data.as_quotation.data = malloc(size * sizeof(Boxed));
+    reference->data.as_quotation.data = calloc(element_size, size);
     if (!reference->data.as_quotation.data)
       goto error_allocating_contents;
   } else {
@@ -485,6 +504,7 @@ Unboxed quotation_alloc(int size) {
  error_allocating_contents:
   unboxed_free(reference);
  error_allocating_value:
+ error_in_arguments:
   return NULL;
 }
 
@@ -586,17 +606,48 @@ Boxed *quotation_data(Boxed quotation) {
  *
  * OWNERSHIP: GIVE
  */
-Boxed quotation_new(int size, ...) {
-  Boxed reference = boxed_new(quotation_alloc(size));
-  if (!reference)
-    goto error_allocating_reference;
+Boxed quotation_new(Type type, int size, ...) {
   va_list arguments;
   va_start(arguments, size);
-  for (int i = 0; i < size; ++i)
-    reference->value->data.as_quotation.data[i] = va_arg(arguments, Boxed);
+  Boxed reference = boxed_new(quotation_alloc(type, size));
+  if (!reference)
+    goto error_allocating_quotation;
+  switch (type) {
+  case QUOTATION:
+    {
+      Boxed *data = reference->value->data.as_quotation.data;
+      for (int i = 0; i < size; ++i)
+        data[i] = va_arg(arguments, Boxed);
+    }
+    break;
+  case INTEGER_QUOTATION:
+    {
+      Integer *data = reference->value->data.as_integer_quotation.data;
+      for (int i = 0; i < size; ++i)
+        data[i] = va_arg(arguments, Integer);
+    }
+    break;
+  case FLOAT_QUOTATION:
+    {
+      Float *data = reference->value->data.as_float_quotation.data;
+      for (int i = 0; i < size; ++i)
+        data[i] = va_arg(arguments, Float);
+    }
+    break;
+  case CHARACTER_QUOTATION:
+    {
+      CodePoint *data = reference->value->data.as_character_quotation.data;
+      for (int i = 0; i < size; ++i)
+        data[i] = va_arg(arguments, CodePoint);
+    }
+    break;
+  default:
+    // Other types will already have been caught by quotation_alloc().
+    break;
+  }
   va_end(arguments);
   return reference;
- error_allocating_reference:
+ error_allocating_quotation:
   return NULL;
 }
 
@@ -682,21 +733,21 @@ void unboxed_free(Unboxed reference) {
  *
  * TODO: Migrate to a more sensible location.
  */
-void utf8_append(uint32_t code_point, uint8_t *result) {
+void utf8_append(CodePoint code_point, Octet *result) {
   if (code_point < 0x80) {
-    *result++ = (uint8_t)(code_point);
+    *result++ = (Octet)(code_point);
   } else if (code_point < 0x800) {
-    *result++ = (uint8_t)(((code_point >> 6)       ) | 0xc0);
-    *result++ = (uint8_t)(((code_point     ) & 0x3f) | 0x80);
+    *result++ = (Octet)(((code_point >>  6)       ) | 0xc0);
+    *result++ = (Octet)(((code_point      ) & 0x3f) | 0x80);
   } else if (code_point < 0x10000) {
-    *result++ = (uint8_t)(((code_point >> 12)       ) | 0xe0);
-    *result++ = (uint8_t)(((code_point >>  6) & 0x3f) | 0x80);
-    *result++ = (uint8_t)(((code_point      ) & 0x3f) | 0x80);
+    *result++ = (Octet)(((code_point >> 12)       ) | 0xe0);
+    *result++ = (Octet)(((code_point >>  6) & 0x3f) | 0x80);
+    *result++ = (Octet)(((code_point      ) & 0x3f) | 0x80);
   } else {
-    *result++ = (uint8_t)(((code_point >> 18)       ) | 0xf0);
-    *result++ = (uint8_t)(((code_point >> 12) & 0x3f) | 0x80);
-    *result++ = (uint8_t)(((code_point >>  6) & 0x3f) | 0x80);
-    *result++ = (uint8_t)(((code_point      ) & 0x3f) | 0x80);
+    *result++ = (Octet)(((code_point >> 18)       ) | 0xf0);
+    *result++ = (Octet)(((code_point >> 12) & 0x3f) | 0x80);
+    *result++ = (Octet)(((code_point >>  6) & 0x3f) | 0x80);
+    *result++ = (Octet)(((code_point      ) & 0x3f) | 0x80);
   }
 }
 
