@@ -19,6 +19,7 @@ function run_test {
     set +e +E
     pass=true
 
+    echo "Running test $1 ..." >&2
     "./build/test/$1" > "./build/test.out/$1" 2> "./build/test.err/$1"
 
     diff -u --strip-trailing-cr -- "./test/$1.out" "./build/test.out/$1"
@@ -36,11 +37,15 @@ function run_test {
 }
 
 for file in ./build/test.warn/* ; do
-    run_warn $(basename "$file")
+    base=$(basename "$file")
+    [ -f "./build/test.warn/$base" ] || continue
+    run_warn $base
 done
 
 for file in ./build/test/* ; do
-    run_test $(basename "$file")
+    base=$(basename "$file")
+    [ -f "./build/test/$base" ] || continue
+    run_test $base
 done
 
 echo 'All tests passed! :)'
