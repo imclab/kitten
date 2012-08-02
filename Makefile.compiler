@@ -13,7 +13,7 @@ CompObjPaths := $(addprefix $(CompObjDir)/, $(CompObjFiles))
 .PHONY : clean-compiler
 clean-compiler :
 	@ echo 'Cleaning compiler build files ...'
-	@ $(CABAL) clean --builddir=$(TargetDir)
+	@ $(CABAL) clean --builddir=$(TargetDir) -v0
 
 .PHONY : compiler
 compiler :
