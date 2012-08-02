@@ -1,14 +1,7 @@
-
+CompSrcDir := compiler
+CompSrcPaths := $(wildcard $(CompSrcDir)/*.hs)
 CompTargetFile := kitten
 CompTargetPath := $(TargetDir)/build/kitten/$(CompTargetFile)
-CompSrcNames := $(basename $(wildcard ./*.hs))
-CompSrcFiles := $(addsuffix .hs, $(CompSrcNames))
-CompInterDir := $(TargetDir)/hi
-CompInterFiles := $(addsuffix .hi, $(CompSrcNames))
-CompInterPaths := $(addprefix $(CompInterDir)/, $(CompInterFiles))
-CompObjDir := $(TargetDir)/obj
-CompObjFiles := $(addsuffix .o, $(CompSrcNames))
-CompObjPaths := $(addprefix $(CompObjDir)/, $(CompObjFiles))
 
 .PHONY : clean-compiler
 clean-compiler :
@@ -16,7 +9,7 @@ clean-compiler :
 	@ $(CABAL) clean --builddir=$(TargetDir) -v0
 
 .PHONY : compiler
-compiler :
-	$(CABAL) build --builddir=$(TargetDir)
+compiler : $(CompTargetPath)
 
-$(CompTargetPath) : compiler
+$(CompTargetPath) : $(CompSrcPaths)
+	$(CABAL) build --builddir=$(TargetDir)

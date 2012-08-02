@@ -23,7 +23,7 @@ clean-tests :
 		$(TestErrDir)/* $(TestWarnDir)/*
 
 .PHONY : tests
-tests : $(CompTargetPath) $(TestTargetPaths)
+tests : $(TestTargetPaths)
 	@ mkdir -p $(TestOutDir)
 	@ mkdir -p $(TestWarnDir)
 	@ mkdir -p $(TestErrDir)
