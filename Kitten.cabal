@@ -28,7 +28,7 @@ executable kitten
     -Wall
 
   hs-source-dirs:
-    compiler
+    compiler/src
 
   include-dirs:
     library
