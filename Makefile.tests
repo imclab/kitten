@@ -16,7 +16,6 @@ else
   TestDebugFlags :=
 endif
 
-
 .PHONY : clean-tests
 clean-tests :
 	@ echo 'Cleaning test build files ...'
