@@ -15,25 +15,19 @@ endif
 LibFlags := -std=c99 -Wall -Werror -Ilibrary
 
 .PHONY : library
-library : .depend $(LibTargetPath)
+library : $(LibTargetPath)
 
 .PHONY : clean-library
 clean-library :
 	@ echo 'Cleaning library build files ...'
-	@ rm -f $(LibObjPaths) $(LibTargetPath) .depend
+	@ rm -f $(LibObjPaths) $(LibTargetPath)
 
-$(LibTargetPath) : $(LibObjPaths) .depend
+$(LibTargetPath) : $(LibObjPaths)
 	$(call ensure_buildable,$@)
 	@ echo 'Linking runtime library ...'
 	@ $(AR) $@ $^
 
-$(TargetDir)/%.o : ./library/%.c .depend
+$(TargetDir)/%.o : ./library/%.c 
 	$(call ensure_buildable,$@)
 	@ echo 'Building $< ...'
 	@ $(CC) -c $< $(LibFlags) $(LibDebugFlags) -o $@
-
-.depend : $(LibSrcPaths)
-	$(call ensure_buildable,$@)
-	@ $(CC) -MM -o $@ $^ $(LibFlags)
-
-include .depend
