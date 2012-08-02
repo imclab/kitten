@@ -29,7 +29,6 @@ endef
 
 include Makefile.library
 include Makefile.compiler
-
 include Makefile.tests
 
 #
