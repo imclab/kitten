@@ -1,11 +1,11 @@
 # Depends upon: Makefile.library, Makefile.compiler
 
-TestTargetDir := $(TargetDir)/test
+TestTargetDir := $(TargetDir)/tests
 TestInterDir := $(TestTargetDir).inter
 TestWarnDir := $(TestTargetDir).warn
 TestOutDir := $(TestTargetDir).out
 TestErrDir := $(TestTargetDir).err
-TestSrcDir := test
+TestSrcDir := tests
 TestSrcPaths := $(wildcard $(TestSrcDir)/*.ktn)
 TestSrcNames := $(basename $(notdir $(TestSrcPaths)))
 TestTargetPaths := $(addprefix $(TestTargetDir)/, $(TestSrcNames))
