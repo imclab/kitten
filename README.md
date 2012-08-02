@@ -13,10 +13,10 @@ installing development tools may be difficult or impossible.
 
 To build the compiler, you need **GHC** and **Cabal**. For the runtime, use
 **GCC** or another suitable **C compiler**. Just download the sources and run
-`make` with your fingers crossed. To build the compiler or runtime library
-individually, run `make compiler` or `make library`, respectively. For more
-information, try `make help`. Please report errors and weirdnesses to [the issue
-tracker](https://github.com/evincarofautumn/kitten/issues).
+`make configure all` with your fingers crossed. To build the compiler or runtime
+library individually, run `make compiler` or `make library`, respectively. For
+more information, try `make help`. Please report errors and weirdnesses to [the
+issue tracker](https://github.com/evincarofautumn/kitten/issues).
 
 Building a Kitten program is a two-step process. First, run through `kitten`:
 
