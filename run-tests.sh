@@ -4,7 +4,8 @@ function run_warn {
     set +e +E
     pass=true
 
-    diff -u --strip-trailing-cr -- "./tests/$1.warn" "./build/tests.warn/$1"
+    diff -u --strip-trailing-cr -- \
+        "./compiler/tests/$1.warn" "./build/tests.warn/$1"
     if [ "$?" != 0 ] ; then pass=false; fi
 
     if ! $pass ; then
@@ -21,10 +22,12 @@ function run_test {
 
     "./build/tests/$1" > "./build/tests.out/$1" 2> "./build/tests.err/$1"
 
-    diff -u --strip-trailing-cr -- "./tests/$1.out" "./build/tests.out/$1"
+    diff -u --strip-trailing-cr -- \
+        "./compiler/tests/$1.out" "./build/tests.out/$1"
     if [ "$?" != 0 ] ; then pass=false; fi
 
-    diff -u --strip-trailing-cr -- "./tests/$1.err" "./build/tests.err/$1"
+    diff -u --strip-trailing-cr -- \
+        "./compiler/tests/$1.err" "./build/tests.err/$1"
     if [ "$?" != 0 ] ; then pass=false; fi
 
     if ! $pass ; then
