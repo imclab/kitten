@@ -1,43 +1,48 @@
 # Depends upon: Makefile.library, Makefile.compiler
 
-TestTargetDir := $(TargetDir)/tests
-TestInterDir := $(TestTargetDir).inter
-TestWarnDir := $(TestTargetDir).warn
-TestOutDir := $(TestTargetDir).out
-TestErrDir := $(TestTargetDir).err
-TestSrcDir := compiler/tests
-TestSrcPaths := $(wildcard $(TestSrcDir)/*.ktn)
-TestSrcNames := $(basename $(notdir $(TestSrcPaths)))
-TestTargetPaths := $(addprefix $(TestTargetDir)/, $(TestSrcNames))
+PositiveTargetDir := $(TargetDir)/tests/positive
+PositiveInterDir := $(PositiveTargetDir).inter
+PositiveWarnDir := $(PositiveTargetDir).warn
+PositiveOutDir := $(PositiveTargetDir).out
+PositiveErrDir := $(PositiveTargetDir).err
+PositiveSrcDir := compiler/tests/positive
+PositiveSrcPaths := $(wildcard $(PositiveSrcDir)/*.ktn)
+PositiveSrcNames := $(basename $(notdir $(PositiveSrcPaths)))
+PositiveTargetPaths := $(addprefix $(PositiveTargetDir)/, $(PositiveSrcNames))
+# NegSrcPaths := $(wildcard $(PositiveSrcDir)/negative/*.ktn)
 
 ifdef DEBUG
-  TestDebugFlags := -DDEBUG -g
+  PositiveDebugFlags := -DDEBUG -g
 else
-  TestDebugFlags :=
+  PositiveDebugFlags :=
 endif
 
 .PHONY : clean-tests
 clean-tests :
 	@ echo 'Cleaning test build files ...'
-	@ rm -rf $(TestTargetDir)/* $(TestInterDir)/* $(TestOutDir)/* \
-		$(TestErrDir)/* $(TestWarnDir)/*
+	@ rm -rf $(PositiveTargetDir)/* \
+		$(PositiveInterDir)/* \
+		$(PositiveOutDir)/* \
+		$(PositiveErrDir)/* \
+		$(PositiveWarnDir)/*
 
 .PHONY : tests
-tests : $(TestTargetPaths)
-	@ mkdir -p $(TestOutDir)
-	@ mkdir -p $(TestWarnDir)
-	@ mkdir -p $(TestErrDir)
+tests : $(PositiveTargetPaths)
+	@ mkdir -p $(PositiveOutDir)
+	@ mkdir -p $(PositiveWarnDir)
+	@ mkdir -p $(PositiveErrDir)
 	@ echo 'Running tests ...'
-	@ ./run-tests.sh
+	@ ./run-tests.sh $(PositiveSrcDir) $(PositiveTargetDir)
 
-$(TestInterDir)/%.c : $(TestSrcDir)/%.ktn $(CompTargetPath)
+$(PositiveInterDir)/%.c : $(PositiveSrcDir)/%.ktn $(CompTargetPath)
 	$(call ensure_buildable,$@)
-	@ mkdir -p $(TestWarnDir)
-	@ $(CompTargetPath) $< > $@ 2> $(TestWarnDir)/$(basename $(notdir $@))
+	@ mkdir -p $(PositiveWarnDir)
+	@ $(CompTargetPath) $< > $@ \
+		2> $(PositiveWarnDir)/$(basename $(notdir $@))
 
-$(TestTargetDir)/% : $(TestInterDir)/%.c $(LibTargetPath)
+$(PositiveTargetDir)/% : $(PositiveInterDir)/%.c $(LibTargetPath)
 	$(call ensure_buildable,$@)
 	@ echo 'Building test $(notdir $@) ...'
 	@ $(CC) -std=c99 $< \
 		-L$(TargetDir) -l$(LibTargetName) -lm -Ilibrary -o $@ \
-		$(TestDebugFlags)
+		$(PositiveDebugFlags)
