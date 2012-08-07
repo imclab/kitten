@@ -57,7 +57,7 @@ args=("$@")
 #     fi
 # done
 
-for file in ./build/tests/positive/* ; do
+for file in ${args[1]}/* ; do
     if [ -f "$file" ]; then
         justfile=$(basename "$file")
         echo "Running test $justfile ..."
