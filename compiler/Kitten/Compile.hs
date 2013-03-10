@@ -10,6 +10,7 @@ import Kitten.Def
 import Kitten.Error
 import Kitten.Fragment
 import Kitten.Resolve
+import Kitten.Scope
 import Kitten.Term
 import Kitten.Token
 import Kitten.Type
@@ -27,8 +28,9 @@ compile stack prelude name source = do
   tokenized <- failIfError $ tokenize name source
   parsed <- failIfError $ parse name tokenized
   resolved <- resolveFragment prelude parsed
+  scoped <- scopeFragment resolved
   void $ typeFragment prelude stack resolved
-  return resolved
+  return scoped
 
 typecheck
   :: [Resolve.Value]
